@@ -612,7 +612,10 @@ Location: ${data.location}
             extensionSettings: typeof extensionSettings,
             saveSettingsDebounced: typeof saveSettingsDebounced,
             SlashCommandParser: typeof window.SlashCommandParser,
+            SlashCommand: typeof window.SlashCommand,
             registerSlashCommand: typeof context.registerSlashCommand,
+            contextSlashCommandParser: typeof context.SlashCommandParser,
+            contextSlashCommand: typeof context.SlashCommand,
             contextKeys: Object.keys(context).slice(0, 20) // Show first 20 keys
         });
         
@@ -627,9 +630,69 @@ Location: ${data.location}
         
         // Try different slash command registration methods
         const registerSlashCommand = context.registerSlashCommand || window.registerSlashCommand;
+        const SlashCommandParser = context.SlashCommandParser || window.SlashCommandParser;
+        const SlashCommand = context.SlashCommand || window.SlashCommand;
         
-        if (typeof registerSlashCommand === 'function') {
-            console.log("[STRES] Using registerSlashCommand function");
+        if (typeof SlashCommandParser !== 'undefined' && typeof SlashCommand !== 'undefined') {
+            console.log("[STRES] Using modern SlashCommandParser.addCommandObject method");
+            
+            SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+                name: 'stres_campaign',
+                callback: manageCampaign,
+                helpString: 'STRES campaign management - Usage: /stres_campaign create|load|delete <name>'
+            }));
+            
+            SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+                name: 'stres_npc',
+                callback: generateNPC,
+                helpString: 'Generate NPC - Usage: /stres_npc <culture> <role> [gender] [level]'
+            }));
+            
+            SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+                name: 'stres_monster',
+                callback: generateMonster,
+                helpString: 'Generate monster - Usage: /stres_monster <type> <level> [size] [boss]'
+            }));
+            
+            SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+                name: 'stres_location',
+                callback: generateLocation,
+                helpString: 'Generate location - Usage: /stres_location <type> [size] [wealth]'
+            }));
+            
+            SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+                name: 'stres_roll',
+                callback: rollDice,
+                helpString: 'Roll dice - Usage: /stres_roll <expression> [modifier] [target]'
+            }));
+            
+            SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+                name: 'stres_settings',
+                callback: showSettings,
+                helpString: 'STRES settings panel'
+            }));
+            
+            SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+                name: 'stats',
+                callback: showCharacterStats,
+                helpString: 'Show character stats'
+            }));
+            
+            SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+                name: 'inventory',
+                callback: showInventory,
+                helpString: 'Show character inventory'
+            }));
+            
+            SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+                name: 'world',
+                callback: showWorldInfo,
+                helpString: 'Show world information'
+            }));
+            
+            console.log("[STRES] Slash commands registered successfully using SlashCommandParser");
+        } else if (typeof registerSlashCommand === 'function') {
+            console.log("[STRES] Using legacy registerSlashCommand function");
             
             registerSlashCommand('stres_campaign', manageCampaign, [], 'STRES campaign management', true, true);
             registerSlashCommand('stres_npc', generateNPC, [], 'Generate NPC', true, true);
@@ -642,22 +705,11 @@ Location: ${data.location}
             registerSlashCommand('world', showWorldInfo, [], 'Show world information', true, true);
             
             console.log("[STRES] Slash commands registered successfully using registerSlashCommand");
-        } else if (typeof window.SlashCommandParser !== 'undefined' && typeof window.SlashCommand !== 'undefined') {
-            console.log("[STRES] Using SlashCommandParser");
-            
-            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
-                name: 'stres_campaign',
-                callback: campaignCommand,
-                helpString: 'STRES campaign management'
-            }));
-            
-            console.log("[STRES] Slash commands registered successfully using SlashCommandParser");
         } else {
             console.error("[STRES] No slash command registration method found:", {
                 registerSlashCommand: typeof registerSlashCommand,
-                contextRegisterSlashCommand: typeof context.registerSlashCommand,
-                windowRegisterSlashCommand: typeof window.registerSlashCommand,
-                SlashCommandParser: typeof window.SlashCommandParser
+                SlashCommandParser: typeof SlashCommandParser,
+                SlashCommand: typeof SlashCommand
             });
         }
         
