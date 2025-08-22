@@ -322,7 +322,7 @@ Active Effects: None`;
 
     function registerSlashCommands() {
         // Use window.registerSlashCommand (SillyTavern's global function)
-        const register = window.registerSlashCommand || registerSlashCommand;
+        const register = window.registerSlashCommand || window.SlashCommandParser?.addCommand;
         
         if (typeof register !== 'function') {
             console.error("[STRES] registerSlashCommand not available");
@@ -637,37 +637,93 @@ Location: ${data.location}
         }
     }
 
-    // Initialize extension using SillyTavern's extension system
+    // Proper SillyTavern extension initialization
     jQuery(async () => {
-        console.log("[STRES] jQuery ready, waiting for SillyTavern...");
+        console.log("[STRES] Extension starting...");
         
-        // Wait for SillyTavern to be fully loaded
-        await new Promise(resolve => {
-            const checkSillyTavern = () => {
-                console.log("[STRES] Checking SillyTavern state:", {
-                    registerSlashCommand: typeof window.registerSlashCommand,
-                    extension_settings: typeof window.extension_settings,
-                    getContext: typeof window.getContext
-                });
-                
-                if (typeof window.registerSlashCommand === 'function' && window.extension_settings) {
-                    console.log("[STRES] SillyTavern ready!");
-                    resolve();
-                } else {
-                    setTimeout(checkSillyTavern, 500);
-                }
-            };
-            checkSillyTavern();
+        // Wait for SillyTavern to be ready
+        const context = SillyTavern.getContext();
+        const { extensionSettings, saveSettingsDebounced, eventSource, event_types } = context;
+        
+        console.log("[STRES] SillyTavern context obtained:", {
+            extensionSettings: typeof extensionSettings,
+            saveSettingsDebounced: typeof saveSettingsDebounced,
+            SlashCommandParser: typeof SlashCommandParser
         });
         
-        console.log("[STRES] SillyTavern loaded, initializing extension...");
-        
-        try {
-            await onExtensionLoad();
-            console.log("[STRES] Extension loaded successfully");
-        } catch (error) {
-            console.error("[STRES] Failed to initialize:", error);
+        // Initialize settings
+        if (!extensionSettings[extensionName]) {
+            extensionSettings[extensionName] = structuredClone(defaultSettings);
+            saveSettingsDebounced();
         }
+        
+        // Initialize STRES client
+        stresClient = new STRESClient(extensionSettings[extensionName].serverUrl);
+        
+        // Register slash commands using proper SillyTavern API
+        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+            name: 'stres_campaign',
+            callback: campaignCommand,
+            helpString: 'STRES campaign management - Usage: /stres_campaign create|load|delete <name>'
+        }));
+        
+        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+            name: 'stres_npc',
+            callback: generateNPC,
+            helpString: 'Generate NPC - Usage: /stres_npc <culture> <role> [gender] [level]'
+        }));
+        
+        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+            name: 'stres_monster',
+            callback: generateMonster,
+            helpString: 'Generate monster - Usage: /stres_monster <type> <level> [size] [boss]'
+        }));
+        
+        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+            name: 'stres_location',
+            callback: generateLocation,
+            helpString: 'Generate location - Usage: /stres_location <type> [size] [wealth]'
+        }));
+        
+        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+            name: 'stres_roll',
+            callback: rollDice,
+            helpString: 'Roll dice - Usage: /stres_roll <expression> [modifier] [target]'
+        }));
+        
+        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+            name: 'stres_settings',
+            callback: showSettings,
+            helpString: 'STRES settings panel'
+        }));
+        
+        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+            name: 'stats',
+            callback: () => 'Character stats display',
+            helpString: 'Show character stats'
+        }));
+        
+        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+            name: 'inventory',
+            callback: () => 'Character inventory display',
+            helpString: 'Show character inventory'
+        }));
+        
+        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+            name: 'world',
+            callback: () => 'World information display',
+            helpString: 'Show world information'
+        }));
+        
+        // Setup UI if needed
+        setupUI();
+        
+        // Load campaign if one is configured
+        if (extensionSettings[extensionName].campaignId) {
+            await loadCampaign(extensionSettings[extensionName].campaignId);
+        }
+        
+        console.log("[STRES] Extension loaded successfully");
     });
 
 })();
