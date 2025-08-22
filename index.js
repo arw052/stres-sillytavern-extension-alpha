@@ -284,25 +284,23 @@ Active Effects: None`;
 
     async function loadSettings() {
         // Access SillyTavern's extension_settings
-        if (typeof extension_settings === 'undefined') {
+        const settings = window.extension_settings || extension_settings;
+        
+        if (typeof settings === 'undefined') {
             console.error("[STRES] extension_settings not available");
             return;
         }
         
-        extension_settings[extensionName] = extension_settings[extensionName] || {};
+        settings[extensionName] = settings[extensionName] || {};
         
-        if (Object.keys(extension_settings[extensionName]).length === 0) {
-            Object.assign(extension_settings[extensionName], defaultSettings);
+        if (Object.keys(settings[extensionName]).length === 0) {
+            Object.assign(settings[extensionName], defaultSettings);
         }
         
-        // Use SillyTavern's saveSettingsDebounced if available
-        if (typeof saveSettingsDebounced === 'function') {
-            saveSettingsDebounced();
-        } else if (typeof saveExtensionSettings === 'function') {
-            saveExtensionSettings();
-        }
+        // Make settings globally accessible for our extension
+        window.extension_settings = settings;
         
-        console.log("[STRES] Settings loaded:", extension_settings[extensionName]);
+        console.log("[STRES] Settings loaded:", settings[extensionName]);
     }
 
     async function onExtensionLoad() {
@@ -323,24 +321,37 @@ Active Effects: None`;
     }
 
     function registerSlashCommands() {
-        registerSlashCommand('stats', showCharacterStats, [], "Show character stats", true, true);
-        registerSlashCommand('inventory', showInventory, [], "Show character inventory", true, true);
-        registerSlashCommand('world', showWorldInfo, [], "Show world information", true, true);
-        registerSlashCommand('stres_campaign', manageCampaign, ['action'], "Manage STRES campaign", true, true);
-        registerSlashCommand('stres_npc', generateNPC, ['culture', 'role'], "Generate NPC", true, true);
-        registerSlashCommand('stres_monster', generateMonster, ['type', 'level'], "Generate monster", true, true);
-        registerSlashCommand('stres_location', generateLocation, ['type'], "Generate location", true, true);
-        registerSlashCommand('stres_roll', rollDice, ['dice'], "Roll dice", true, true);
-        registerSlashCommand('stres_settings', showSettings, [], "STRES settings", true, true);
+        // Use window.registerSlashCommand (SillyTavern's global function)
+        const register = window.registerSlashCommand || registerSlashCommand;
+        
+        if (typeof register !== 'function') {
+            console.error("[STRES] registerSlashCommand not available");
+            return;
+        }
+        
+        console.log("[STRES] Registering slash commands...");
+        
+        register('stats', showCharacterStats, [], "Show character stats", true, true);
+        register('inventory', showInventory, [], "Show character inventory", true, true);
+        register('world', showWorldInfo, [], "Show world information", true, true);
+        register('stres_campaign', manageCampaign, ['action'], "Manage STRES campaign", true, true);
+        register('stres_npc', generateNPC, ['culture', 'role'], "Generate NPC", true, true);
+        register('stres_monster', generateMonster, ['type', 'level'], "Generate monster", true, true);
+        register('stres_location', generateLocation, ['type'], "Generate location", true, true);
+        register('stres_roll', rollDice, ['dice'], "Roll dice", true, true);
+        register('stres_settings', showSettings, [], "STRES settings", true, true);
+        
+        console.log("[STRES] Slash commands registered");
     }
 
     async function showCharacterStats(args) {
-        if (!extension_settings[extensionName].campaignId) {
+        const settings = window.extension_settings || extension_settings;
+        if (!settings[extensionName]?.campaignId) {
             return "No campaign loaded. Use /stres_campaign create <name> first.";
         }
         
         try {
-            const characters = await stresClient.getCharacters(extension_settings[extensionName].campaignId);
+            const characters = await stresClient.getCharacters(settings[extensionName].campaignId);
             const playerChar = characters.find(c => c.is_player);
             
             if (!playerChar) {
@@ -376,6 +387,8 @@ Location: ${data.location}
     }
 
     async function manageCampaign(args) {
+        const settings = window.extension_settings || extension_settings;
+        
         if (args.length === 0) {
             try {
                 const campaigns = await stresClient.getCampaigns();
@@ -386,7 +399,7 @@ Location: ${data.location}
                 response += "\\nUse '/stres_campaign create <name>' or '/stres_campaign load <id>'";
                 return response;
             } catch (error) {
-                return `Error: Cannot connect to STRES server at ${extension_settings[extensionName].serverUrl}. Is it running?`;
+                return `Error: Cannot connect to STRES server at ${settings[extensionName]?.serverUrl || 'localhost:8000'}. Is it running?`;
             }
         }
         
@@ -398,7 +411,7 @@ Location: ${data.location}
                 case 'create':
                     if (!name) return "Please provide a campaign name";
                     const newCampaign = await stresClient.createCampaign({ name, description: "" });
-                    extension_settings[extensionName].campaignId = newCampaign.id;
+                    settings[extensionName].campaignId = newCampaign.id;
                     if (typeof saveSettingsDebounced === 'function') {
                         saveSettingsDebounced();
                     }
@@ -408,7 +421,7 @@ Location: ${data.location}
                 case 'load':
                     if (!name) return "Please provide a campaign ID";
                     await loadCampaign(name);
-                    extension_settings[extensionName].campaignId = name;
+                    settings[extensionName].campaignId = name;
                     if (typeof saveSettingsDebounced === 'function') {
                         saveSettingsDebounced();
                     }
@@ -417,8 +430,8 @@ Location: ${data.location}
                 case 'delete':
                     if (!name) return "Please provide a campaign ID";
                     await stresClient.deleteCampaign(name);
-                    if (extension_settings[extensionName].campaignId === name) {
-                        extension_settings[extensionName].campaignId = null;
+                    if (settings[extensionName].campaignId === name) {
+                        settings[extensionName].campaignId = null;
                         if (typeof saveSettingsDebounced === 'function') {
                             saveSettingsDebounced();
                         }
@@ -438,14 +451,15 @@ Location: ${data.location}
             return "Usage: /stres_npc <culture> <role> [gender] [level]\\nExample: /stres_npc elf merchant female 3";
         }
         
-        if (!extension_settings[extensionName].campaignId) {
+        const settings = window.extension_settings || extension_settings;
+        if (!settings[extensionName].campaignId) {
             return "No campaign loaded. Use /stres_campaign create <name> first.";
         }
         
         const [culture, role, gender, level] = args;
         try {
             const result = await stresClient.generateNPC(
-                extension_settings[extensionName].campaignId,
+                settings[extensionName].campaignId,
                 culture,
                 role,
                 { gender, level: parseInt(level) || 1 }
@@ -467,14 +481,15 @@ Location: ${data.location}
             return "Usage: /stres_monster <type> <level> [size] [boss]\\nExample: /stres_monster dragon 5 large true";
         }
         
-        if (!extension_settings[extensionName].campaignId) {
+        const settings = window.extension_settings || extension_settings;
+        if (!settings[extensionName].campaignId) {
             return "No campaign loaded. Use /stres_campaign create <name> first.";
         }
         
         const [type, level, size, isBoss] = args;
         try {
             const result = await stresClient.generateMonster(
-                extension_settings[extensionName].campaignId,
+                settings[extensionName].campaignId,
                 type,
                 parseInt(level) || 1,
                 { size: size || 'medium', is_boss: isBoss === 'true' }
@@ -496,14 +511,15 @@ Location: ${data.location}
             return "Usage: /stres_location <type> [name] [size] [wealth]\\nExample: /stres_location tavern medium wealthy";
         }
         
-        if (!extension_settings[extensionName].campaignId) {
+        const settings = window.extension_settings || extension_settings;
+        if (!settings[extensionName].campaignId) {
             return "No campaign loaded. Use /stres_campaign create <name> first.";
         }
         
         const [type, size, wealth] = args;
         try {
             const result = await stresClient.generateLocation(
-                extension_settings[extensionName].campaignId,
+                settings[extensionName].campaignId,
                 type,
                 { size: size || 'medium', wealth_level: wealth || 'comfortable' }
             );
@@ -550,21 +566,22 @@ Location: ${data.location}
     }
 
     async function showSettings(args) {
+        const settings = window.extension_settings || extension_settings;
         const html = `
             <div class="stres-settings">
                 <h3>STRES Settings</h3>
                 <div>
-                    <label>Server URL: <input type="text" id="stres-server-url" value="${extension_settings[extensionName].serverUrl}"></label>
+                    <label>Server URL: <input type="text" id="stres-server-url" value="${settings[extensionName].serverUrl}"></label>
                 </div>
                 <div>
-                    <label>Auto-injection: <input type="checkbox" id="stres-auto-inject" ${extension_settings[extensionName].autoInjection.enabled ? 'checked' : ''}></label>
+                    <label>Auto-injection: <input type="checkbox" id="stres-auto-inject" ${settings[extensionName].autoInjection.enabled ? 'checked' : ''}></label>
                 </div>
                 <div>
                     <label>Theme: 
                         <select id="stres-theme">
-                            <option value="fantasy" ${extension_settings[extensionName].ui.theme === 'fantasy' ? 'selected' : ''}>Fantasy</option>
-                            <option value="cyberpunk" ${extension_settings[extensionName].ui.theme === 'cyberpunk' ? 'selected' : ''}>Cyberpunk</option>
-                            <option value="minimal" ${extension_settings[extensionName].ui.theme === 'minimal' ? 'selected' : ''}>Minimal</option>
+                            <option value="fantasy" ${settings[extensionName].ui.theme === 'fantasy' ? 'selected' : ''}>Fantasy</option>
+                            <option value="cyberpunk" ${settings[extensionName].ui.theme === 'cyberpunk' ? 'selected' : ''}>Cyberpunk</option>
+                            <option value="minimal" ${settings[extensionName].ui.theme === 'minimal' ? 'selected' : ''}>Minimal</option>
                         </select>
                     </label>
                 </div>
@@ -575,19 +592,21 @@ Location: ${data.location}
     }
 
     function setupUI() {
+        const settings = window.extension_settings || extension_settings;
         const container = document.createElement('div');
         container.id = 'stres-container';
-        container.className = `stres-theme-${extension_settings[extensionName].ui.theme}`;
+        container.className = `stres-theme-${settings[extensionName].ui.theme}`;
         document.body.appendChild(container);
         
-        if (extension_settings[extensionName].ui.showHUD) {
+        if (settings[extensionName].ui.showHUD) {
             characterPanel.render(container);
         }
         
         window.saveSTRESSettings = function() {
-            extension_settings[extensionName].serverUrl = document.getElementById('stres-server-url').value;
-            extension_settings[extensionName].autoInjection.enabled = document.getElementById('stres-auto-inject').checked;
-            extension_settings[extensionName].ui.theme = document.getElementById('stres-theme').value;
+            const currentSettings = window.extension_settings || extension_settings;
+            currentSettings[extensionName].serverUrl = document.getElementById('stres-server-url').value;
+            currentSettings[extensionName].autoInjection.enabled = document.getElementById('stres-auto-inject').checked;
+            currentSettings[extensionName].ui.theme = document.getElementById('stres-theme').value;
             
             // Use SillyTavern's save function
             if (typeof saveSettingsDebounced === 'function') {
@@ -618,40 +637,30 @@ Location: ${data.location}
         }
     }
 
-    // Initialize extension when SillyTavern loads
-    function initializeSTRES() {
-        console.log("[STRES] Attempting to initialize...");
+    // Initialize extension using SillyTavern's extension system
+    jQuery(async () => {
+        console.log("[STRES] jQuery ready, waiting for SillyTavern...");
         
-        // Check if SillyTavern API is available
-        if (typeof getContext === 'undefined' || typeof registerSlashCommand === 'undefined') {
-            console.log("[STRES] SillyTavern API not ready, retrying in 1 second...");
-            setTimeout(initializeSTRES, 1000);
-            return;
-        }
+        // Wait for SillyTavern to be fully loaded
+        await new Promise(resolve => {
+            const checkSillyTavern = () => {
+                if (window.extensions && typeof window.registerSlashCommand === 'function') {
+                    resolve();
+                } else {
+                    setTimeout(checkSillyTavern, 500);
+                }
+            };
+            checkSillyTavern();
+        });
         
-        console.log("[STRES] SillyTavern API available, loading extension...");
+        console.log("[STRES] SillyTavern loaded, initializing extension...");
         
         try {
-            onExtensionLoad();
-            
-            const context = getContext();
-            if (context?.eventSource) {
-                context.eventSource.on('messageSend', (data) => {
-                    if (extension_settings[extensionName]?.autoInjection?.enabled && autoInjector) {
-                        autoInjector.injectContext(data);
-                    }
-                });
-            }
+            await onExtensionLoad();
+            console.log("[STRES] Extension loaded successfully");
         } catch (error) {
             console.error("[STRES] Failed to initialize:", error);
-            setTimeout(initializeSTRES, 2000);
         }
-    }
-
-    // Start initialization when jQuery is ready
-    jQuery(() => {
-        console.log("[STRES] jQuery ready, starting initialization...");
-        initializeSTRES();
     });
 
 })();
