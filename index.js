@@ -648,7 +648,8 @@ Location: ${data.location}
         console.log("[STRES] SillyTavern context obtained:", {
             extensionSettings: typeof extensionSettings,
             saveSettingsDebounced: typeof saveSettingsDebounced,
-            SlashCommandParser: typeof SlashCommandParser
+            SlashCommandParser: typeof window.SlashCommandParser,
+            contextKeys: Object.keys(context)
         });
         
         // Initialize settings
@@ -660,60 +661,71 @@ Location: ${data.location}
         // Initialize STRES client
         stresClient = new STRESClient(extensionSettings[extensionName].serverUrl);
         
-        // Register slash commands using proper SillyTavern API
-        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
-            name: 'stres_campaign',
-            callback: campaignCommand,
-            helpString: 'STRES campaign management - Usage: /stres_campaign create|load|delete <name>'
-        }));
-        
-        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
-            name: 'stres_npc',
-            callback: generateNPC,
-            helpString: 'Generate NPC - Usage: /stres_npc <culture> <role> [gender] [level]'
-        }));
-        
-        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
-            name: 'stres_monster',
-            callback: generateMonster,
-            helpString: 'Generate monster - Usage: /stres_monster <type> <level> [size] [boss]'
-        }));
-        
-        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
-            name: 'stres_location',
-            callback: generateLocation,
-            helpString: 'Generate location - Usage: /stres_location <type> [size] [wealth]'
-        }));
-        
-        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
-            name: 'stres_roll',
-            callback: rollDice,
-            helpString: 'Roll dice - Usage: /stres_roll <expression> [modifier] [target]'
-        }));
-        
-        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
-            name: 'stres_settings',
-            callback: showSettings,
-            helpString: 'STRES settings panel'
-        }));
-        
-        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
-            name: 'stats',
-            callback: () => 'Character stats display',
-            helpString: 'Show character stats'
-        }));
-        
-        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
-            name: 'inventory',
-            callback: () => 'Character inventory display',
-            helpString: 'Show character inventory'
-        }));
-        
-        SlashCommandParser.addCommandObject(SlashCommand.fromProps({
-            name: 'world',
-            callback: () => 'World information display',
-            helpString: 'Show world information'
-        }));
+        // Check if SlashCommandParser is available and register commands
+        if (typeof window.SlashCommandParser !== 'undefined' && typeof window.SlashCommand !== 'undefined') {
+            console.log("[STRES] Registering slash commands...");
+            
+            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
+                name: 'stres_campaign',
+                callback: campaignCommand,
+                helpString: 'STRES campaign management - Usage: /stres_campaign create|load|delete <name>'
+            }));
+            
+            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
+                name: 'stres_npc',
+                callback: generateNPC,
+                helpString: 'Generate NPC - Usage: /stres_npc <culture> <role> [gender] [level]'
+            }));
+            
+            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
+                name: 'stres_monster',
+                callback: generateMonster,
+                helpString: 'Generate monster - Usage: /stres_monster <type> <level> [size] [boss]'
+            }));
+            
+            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
+                name: 'stres_location',
+                callback: generateLocation,
+                helpString: 'Generate location - Usage: /stres_location <type> [size] [wealth]'
+            }));
+            
+            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
+                name: 'stres_roll',
+                callback: rollDice,
+                helpString: 'Roll dice - Usage: /stres_roll <expression> [modifier] [target]'
+            }));
+            
+            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
+                name: 'stres_settings',
+                callback: showSettings,
+                helpString: 'STRES settings panel'
+            }));
+            
+            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
+                name: 'stats',
+                callback: () => 'Character stats display',
+                helpString: 'Show character stats'
+            }));
+            
+            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
+                name: 'inventory',
+                callback: () => 'Character inventory display',
+                helpString: 'Show character inventory'
+            }));
+            
+            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
+                name: 'world',
+                callback: () => 'World information display',
+                helpString: 'Show world information'
+            }));
+            
+            console.log("[STRES] Slash commands registered successfully");
+        } else {
+            console.error("[STRES] SlashCommandParser or SlashCommand not available:", {
+                SlashCommandParser: typeof window.SlashCommandParser,
+                SlashCommand: typeof window.SlashCommand
+            });
+        }
         
         // Setup UI if needed
         setupUI();
