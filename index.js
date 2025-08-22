@@ -554,8 +554,8 @@ Location: ${data.location}
         return html;
     }
 
-    function setupUI() {
-        const settings = window.extension_settings || extension_settings;
+    function setupUI(extensionSettings) {
+        const settings = extensionSettings || window.extension_settings;
         const container = document.createElement('div');
         container.id = 'stres-container';
         container.className = `stres-theme-${settings[extensionName].ui.theme}`;
@@ -612,7 +612,8 @@ Location: ${data.location}
             extensionSettings: typeof extensionSettings,
             saveSettingsDebounced: typeof saveSettingsDebounced,
             SlashCommandParser: typeof window.SlashCommandParser,
-            contextKeys: Object.keys(context)
+            registerSlashCommand: typeof context.registerSlashCommand,
+            contextKeys: Object.keys(context).slice(0, 20) // Show first 20 keys
         });
         
         // Initialize settings
@@ -624,74 +625,44 @@ Location: ${data.location}
         // Initialize STRES client
         stresClient = new STRESClient(extensionSettings[extensionName].serverUrl);
         
-        // Check if SlashCommandParser is available and register commands
-        if (typeof window.SlashCommandParser !== 'undefined' && typeof window.SlashCommand !== 'undefined') {
-            console.log("[STRES] Registering slash commands...");
+        // Try different slash command registration methods
+        const registerSlashCommand = context.registerSlashCommand || window.registerSlashCommand;
+        
+        if (typeof registerSlashCommand === 'function') {
+            console.log("[STRES] Using registerSlashCommand function");
+            
+            registerSlashCommand('stres_campaign', campaignCommand, [], 'STRES campaign management', true, true);
+            registerSlashCommand('stres_npc', generateNPC, [], 'Generate NPC', true, true);
+            registerSlashCommand('stres_monster', generateMonster, [], 'Generate monster', true, true);
+            registerSlashCommand('stres_location', generateLocation, [], 'Generate location', true, true);
+            registerSlashCommand('stres_roll', rollDice, [], 'Roll dice', true, true);
+            registerSlashCommand('stres_settings', showSettings, [], 'STRES settings', true, true);
+            registerSlashCommand('stats', () => 'Character stats display', [], 'Show character stats', true, true);
+            registerSlashCommand('inventory', () => 'Character inventory display', [], 'Show character inventory', true, true);
+            registerSlashCommand('world', () => 'World information display', [], 'Show world information', true, true);
+            
+            console.log("[STRES] Slash commands registered successfully using registerSlashCommand");
+        } else if (typeof window.SlashCommandParser !== 'undefined' && typeof window.SlashCommand !== 'undefined') {
+            console.log("[STRES] Using SlashCommandParser");
             
             window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
                 name: 'stres_campaign',
                 callback: campaignCommand,
-                helpString: 'STRES campaign management - Usage: /stres_campaign create|load|delete <name>'
+                helpString: 'STRES campaign management'
             }));
             
-            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
-                name: 'stres_npc',
-                callback: generateNPC,
-                helpString: 'Generate NPC - Usage: /stres_npc <culture> <role> [gender] [level]'
-            }));
-            
-            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
-                name: 'stres_monster',
-                callback: generateMonster,
-                helpString: 'Generate monster - Usage: /stres_monster <type> <level> [size] [boss]'
-            }));
-            
-            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
-                name: 'stres_location',
-                callback: generateLocation,
-                helpString: 'Generate location - Usage: /stres_location <type> [size] [wealth]'
-            }));
-            
-            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
-                name: 'stres_roll',
-                callback: rollDice,
-                helpString: 'Roll dice - Usage: /stres_roll <expression> [modifier] [target]'
-            }));
-            
-            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
-                name: 'stres_settings',
-                callback: showSettings,
-                helpString: 'STRES settings panel'
-            }));
-            
-            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
-                name: 'stats',
-                callback: () => 'Character stats display',
-                helpString: 'Show character stats'
-            }));
-            
-            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
-                name: 'inventory',
-                callback: () => 'Character inventory display',
-                helpString: 'Show character inventory'
-            }));
-            
-            window.SlashCommandParser.addCommandObject(window.SlashCommand.fromProps({
-                name: 'world',
-                callback: () => 'World information display',
-                helpString: 'Show world information'
-            }));
-            
-            console.log("[STRES] Slash commands registered successfully");
+            console.log("[STRES] Slash commands registered successfully using SlashCommandParser");
         } else {
-            console.error("[STRES] SlashCommandParser or SlashCommand not available:", {
-                SlashCommandParser: typeof window.SlashCommandParser,
-                SlashCommand: typeof window.SlashCommand
+            console.error("[STRES] No slash command registration method found:", {
+                registerSlashCommand: typeof registerSlashCommand,
+                contextRegisterSlashCommand: typeof context.registerSlashCommand,
+                windowRegisterSlashCommand: typeof window.registerSlashCommand,
+                SlashCommandParser: typeof window.SlashCommandParser
             });
         }
         
         // Setup UI if needed
-        setupUI();
+        setupUI(extensionSettings);
         
         // Load campaign if one is configured
         if (extensionSettings[extensionName].campaignId) {
