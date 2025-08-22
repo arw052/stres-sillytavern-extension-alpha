@@ -283,13 +283,26 @@ Active Effects: None`;
     }
 
     async function loadSettings() {
+        // Access SillyTavern's extension_settings
+        if (typeof extension_settings === 'undefined') {
+            console.error("[STRES] extension_settings not available");
+            return;
+        }
+        
         extension_settings[extensionName] = extension_settings[extensionName] || {};
         
         if (Object.keys(extension_settings[extensionName]).length === 0) {
             Object.assign(extension_settings[extensionName], defaultSettings);
         }
         
-        saveExtensionSettings();
+        // Use SillyTavern's saveSettingsDebounced if available
+        if (typeof saveSettingsDebounced === 'function') {
+            saveSettingsDebounced();
+        } else if (typeof saveExtensionSettings === 'function') {
+            saveExtensionSettings();
+        }
+        
+        console.log("[STRES] Settings loaded:", extension_settings[extensionName]);
     }
 
     async function onExtensionLoad() {
@@ -386,7 +399,9 @@ Location: ${data.location}
                     if (!name) return "Please provide a campaign name";
                     const newCampaign = await stresClient.createCampaign({ name, description: "" });
                     extension_settings[extensionName].campaignId = newCampaign.id;
-                    saveExtensionSettings();
+                    if (typeof saveSettingsDebounced === 'function') {
+                        saveSettingsDebounced();
+                    }
                     await loadCampaign(newCampaign.id);
                     return `Campaign '${name}' created and loaded`;
                     
@@ -394,7 +409,9 @@ Location: ${data.location}
                     if (!name) return "Please provide a campaign ID";
                     await loadCampaign(name);
                     extension_settings[extensionName].campaignId = name;
-                    saveExtensionSettings();
+                    if (typeof saveSettingsDebounced === 'function') {
+                        saveSettingsDebounced();
+                    }
                     return `Campaign loaded`;
                     
                 case 'delete':
@@ -402,7 +419,9 @@ Location: ${data.location}
                     await stresClient.deleteCampaign(name);
                     if (extension_settings[extensionName].campaignId === name) {
                         extension_settings[extensionName].campaignId = null;
-                        saveExtensionSettings();
+                        if (typeof saveSettingsDebounced === 'function') {
+                            saveSettingsDebounced();
+                        }
                     }
                     return `Campaign deleted`;
                     
@@ -569,7 +588,15 @@ Location: ${data.location}
             extension_settings[extensionName].serverUrl = document.getElementById('stres-server-url').value;
             extension_settings[extensionName].autoInjection.enabled = document.getElementById('stres-auto-inject').checked;
             extension_settings[extensionName].ui.theme = document.getElementById('stres-theme').value;
-            saveExtensionSettings();
+            
+            // Use SillyTavern's save function
+            if (typeof saveSettingsDebounced === 'function') {
+                saveSettingsDebounced();
+            } else if (typeof saveExtensionSettings === 'function') {
+                saveExtensionSettings();
+            }
+            
+            console.log("[STRES] Settings saved");
             location.reload();
         };
     }
@@ -592,22 +619,39 @@ Location: ${data.location}
     }
 
     // Initialize extension when SillyTavern loads
-    jQuery(async () => {
-        // Wait for SillyTavern to be ready
-        if (typeof getContext === 'undefined') {
-            console.error("[STRES] SillyTavern context not available");
+    function initializeSTRES() {
+        console.log("[STRES] Attempting to initialize...");
+        
+        // Check if SillyTavern API is available
+        if (typeof getContext === 'undefined' || typeof registerSlashCommand === 'undefined') {
+            console.log("[STRES] SillyTavern API not ready, retrying in 1 second...");
+            setTimeout(initializeSTRES, 1000);
             return;
         }
         
-        const context = getContext();
-        if (context.eventSource) {
-            context.eventSource.on('chatLoaded', onExtensionLoad);
-            context.eventSource.on('messageSend', (data) => {
-                if (extension_settings[extensionName]?.autoInjection?.enabled && autoInjector) {
-                    autoInjector.injectContext(data);
-                }
-            });
+        console.log("[STRES] SillyTavern API available, loading extension...");
+        
+        try {
+            onExtensionLoad();
+            
+            const context = getContext();
+            if (context?.eventSource) {
+                context.eventSource.on('messageSend', (data) => {
+                    if (extension_settings[extensionName]?.autoInjection?.enabled && autoInjector) {
+                        autoInjector.injectContext(data);
+                    }
+                });
+            }
+        } catch (error) {
+            console.error("[STRES] Failed to initialize:", error);
+            setTimeout(initializeSTRES, 2000);
         }
+    }
+
+    // Start initialization when jQuery is ready
+    jQuery(() => {
+        console.log("[STRES] jQuery ready, starting initialization...");
+        initializeSTRES();
     });
 
 })();
