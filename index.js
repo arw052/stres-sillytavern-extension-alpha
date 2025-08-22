@@ -631,15 +631,15 @@ Location: ${data.location}
         if (typeof registerSlashCommand === 'function') {
             console.log("[STRES] Using registerSlashCommand function");
             
-            registerSlashCommand('stres_campaign', campaignCommand, [], 'STRES campaign management', true, true);
+            registerSlashCommand('stres_campaign', manageCampaign, [], 'STRES campaign management', true, true);
             registerSlashCommand('stres_npc', generateNPC, [], 'Generate NPC', true, true);
             registerSlashCommand('stres_monster', generateMonster, [], 'Generate monster', true, true);
             registerSlashCommand('stres_location', generateLocation, [], 'Generate location', true, true);
             registerSlashCommand('stres_roll', rollDice, [], 'Roll dice', true, true);
             registerSlashCommand('stres_settings', showSettings, [], 'STRES settings', true, true);
-            registerSlashCommand('stats', () => 'Character stats display', [], 'Show character stats', true, true);
-            registerSlashCommand('inventory', () => 'Character inventory display', [], 'Show character inventory', true, true);
-            registerSlashCommand('world', () => 'World information display', [], 'Show world information', true, true);
+            registerSlashCommand('stats', showCharacterStats, [], 'Show character stats', true, true);
+            registerSlashCommand('inventory', showInventory, [], 'Show character inventory', true, true);
+            registerSlashCommand('world', showWorldInfo, [], 'Show world information', true, true);
             
             console.log("[STRES] Slash commands registered successfully using registerSlashCommand");
         } else if (typeof window.SlashCommandParser !== 'undefined' && typeof window.SlashCommand !== 'undefined') {
