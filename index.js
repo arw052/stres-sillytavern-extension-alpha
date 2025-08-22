@@ -303,46 +303,9 @@ Active Effects: None`;
         console.log("[STRES] Settings loaded:", settings[extensionName]);
     }
 
-    async function onExtensionLoad() {
-        await loadSettings();
-        
-        stresClient = new STRESClient(extension_settings[extensionName].serverUrl);
-        characterPanel = new CharacterPanel(stresClient, extension_settings[extensionName]);
-        autoInjector = new AutoInjector(stresClient, extension_settings[extensionName]);
-        
-        registerSlashCommands();
-        setupUI();
-        
-        if (extension_settings[extensionName].campaignId) {
-            await loadCampaign(extension_settings[extensionName].campaignId);
-        }
-        
-        console.log("[STRES] Extension loaded successfully");
-    }
+    // This function is no longer used - initialization moved to main jQuery block
 
-    function registerSlashCommands() {
-        // Use window.registerSlashCommand (SillyTavern's global function)
-        const register = window.registerSlashCommand || window.SlashCommandParser?.addCommand;
-        
-        if (typeof register !== 'function') {
-            console.error("[STRES] registerSlashCommand not available");
-            return;
-        }
-        
-        console.log("[STRES] Registering slash commands...");
-        
-        register('stats', showCharacterStats, [], "Show character stats", true, true);
-        register('inventory', showInventory, [], "Show character inventory", true, true);
-        register('world', showWorldInfo, [], "Show world information", true, true);
-        register('stres_campaign', manageCampaign, ['action'], "Manage STRES campaign", true, true);
-        register('stres_npc', generateNPC, ['culture', 'role'], "Generate NPC", true, true);
-        register('stres_monster', generateMonster, ['type', 'level'], "Generate monster", true, true);
-        register('stres_location', generateLocation, ['type'], "Generate location", true, true);
-        register('stres_roll', rollDice, ['dice'], "Roll dice", true, true);
-        register('stres_settings', showSettings, [], "STRES settings", true, true);
-        
-        console.log("[STRES] Slash commands registered");
-    }
+    // Old function removed - slash commands now registered in main initialization
 
     async function showCharacterStats(args) {
         const settings = window.extension_settings || extension_settings;
