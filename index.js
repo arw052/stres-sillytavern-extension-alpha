@@ -644,7 +644,14 @@ Location: ${data.location}
         // Wait for SillyTavern to be fully loaded
         await new Promise(resolve => {
             const checkSillyTavern = () => {
-                if (window.extensions && typeof window.registerSlashCommand === 'function') {
+                console.log("[STRES] Checking SillyTavern state:", {
+                    registerSlashCommand: typeof window.registerSlashCommand,
+                    extension_settings: typeof window.extension_settings,
+                    getContext: typeof window.getContext
+                });
+                
+                if (typeof window.registerSlashCommand === 'function' && window.extension_settings) {
+                    console.log("[STRES] SillyTavern ready!");
                     resolve();
                 } else {
                     setTimeout(checkSillyTavern, 500);
