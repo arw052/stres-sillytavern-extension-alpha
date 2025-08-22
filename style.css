@@ -1,0 +1,229 @@
+#stres-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 300px;
+    pointer-events: none;
+    z-index: 1000;
+}
+
+.stres-panel {
+    background: rgba(30, 30, 40, 0.95);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 8px;
+    margin: 10px;
+    pointer-events: auto;
+    color: #e0e0e0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.stres-panel.right {
+    position: absolute;
+    right: 0;
+    top: 60px;
+    width: 280px;
+}
+
+.stres-panel.collapsed .stres-panel-content {
+    display: none;
+}
+
+.stres-panel-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: rgba(255, 215, 0, 0.1);
+    border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+    border-radius: 8px 8px 0 0;
+}
+
+.stres-panel-header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #ffd700;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+.stres-panel-toggle {
+    background: transparent;
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    color: #ffd700;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.stres-panel-toggle:hover {
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.stres-panel-content {
+    padding: 15px;
+}
+
+.stres-stat-group {
+    margin-bottom: 15px;
+}
+
+.stres-stat {
+    margin-bottom: 10px;
+}
+
+.stres-stat .label {
+    display: inline-block;
+    width: 35px;
+    font-weight: bold;
+    color: #b0b0b0;
+    font-size: 14px;
+}
+
+.stres-stat .value {
+    color: #ffffff;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.stres-bar {
+    height: 8px;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 4px;
+    margin-top: 4px;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.stres-bar-fill {
+    height: 100%;
+    transition: width 0.3s ease;
+    border-radius: 3px;
+}
+
+.stres-bar-fill.hp {
+    background: linear-gradient(90deg, #c41e3a, #ff4458);
+    box-shadow: 0 0 10px rgba(196, 30, 58, 0.5);
+}
+
+.stres-bar-fill.mp {
+    background: linear-gradient(90deg, #1e90ff, #4aa3ff);
+    box-shadow: 0 0 10px rgba(30, 144, 255, 0.5);
+}
+
+.stres-stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.stres-inventory-summary {
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    margin: 10px 0;
+    font-size: 14px;
+}
+
+.stres-location {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.stres-location .icon {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+/* Theme variations */
+.stres-theme-cyberpunk .stres-panel {
+    background: rgba(10, 10, 20, 0.95);
+    border-color: rgba(0, 255, 255, 0.5);
+}
+
+.stres-theme-cyberpunk .stres-panel-header {
+    background: rgba(0, 255, 255, 0.1);
+    border-bottom-color: rgba(0, 255, 255, 0.3);
+}
+
+.stres-theme-cyberpunk .stres-panel-header h3 {
+    color: #00ffff;
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
+}
+
+.stres-theme-minimal .stres-panel {
+    background: rgba(255, 255, 255, 0.95);
+    border-color: #ddd;
+    color: #333;
+}
+
+.stres-theme-minimal .stres-panel-header {
+    background: #f5f5f5;
+    border-bottom-color: #ddd;
+}
+
+.stres-theme-minimal .stres-panel-header h3 {
+    color: #333;
+    text-shadow: none;
+}
+
+.stres-theme-minimal .stres-stat .label {
+    color: #666;
+}
+
+.stres-theme-minimal .stres-stat .value {
+    color: #000;
+}
+
+/* Settings modal */
+.stres-settings {
+    padding: 20px;
+    background: #2a2a3a;
+    border-radius: 8px;
+    color: #e0e0e0;
+}
+
+.stres-settings h3 {
+    margin-top: 0;
+    color: #ffd700;
+}
+
+.stres-settings div {
+    margin: 15px 0;
+}
+
+.stres-settings label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.stres-settings input[type="text"],
+.stres-settings select {
+    width: 100%;
+    padding: 5px;
+    background: #1a1a2a;
+    border: 1px solid #444;
+    color: #e0e0e0;
+    border-radius: 4px;
+}
+
+.stres-settings button {
+    padding: 8px 16px;
+    background: #ffd700;
+    color: #1a1a2a;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.stres-settings button:hover {
+    background: #ffed4e;
+}
