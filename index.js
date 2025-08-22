@@ -7,6 +7,7 @@
     const defaultSettings = {
         serverUrl: "http://localhost:8000",
         campaignId: null,
+        chatCampaigns: {}, // Maps chat IDs to campaign IDs
         autoInjection: {
             enabled: true,
             mode: "basic",
@@ -528,6 +529,86 @@ Location: ${data.location}
         }
     }
 
+    async function showSTRESStatus(args) {
+        try {
+            const context = SillyTavern.getContext();
+            const settings = context.extensionSettings || window.extension_settings;
+            
+            // Get current chat info
+            const chatMetadata = context.chatMetadata || {};
+            const currentChatId = context.chatId || chatMetadata.chat_id || 'No active chat';
+            const chatName = context.chatName || chatMetadata.chat_name || 'Unknown';
+            
+            // Get campaign info
+            const campaignId = settings[extensionName]?.campaignId;
+            const chatCampaigns = settings[extensionName]?.chatCampaigns || {};
+            const totalCampaigns = Object.keys(chatCampaigns).length;
+            
+            // Check server status
+            let serverStatus = '❌ Not Connected';
+            let campaignInfo = '❌ No Campaign';
+            let characterInfo = '❌ No Character';
+            
+            try {
+                const healthResponse = await fetch(`${settings[extensionName].serverUrl}/api/health`);
+                if (healthResponse.ok) {
+                    serverStatus = '✅ Connected';
+                    
+                    if (campaignId) {
+                        try {
+                            const campaign = await stresClient.getCampaign(campaignId);
+                            const characters = await stresClient.getCharacters(campaignId);
+                            
+                            campaignInfo = `✅ "${campaign.name}" (ID: ${campaignId})`;
+                            
+                            if (characters.length > 0) {
+                                const playerChar = characters.find(c => c.is_player);
+                                if (playerChar) {
+                                    const data = playerChar.data;
+                                    characterInfo = `✅ ${playerChar.name} (Level ${data.level}) - HP: ${data.stats.hp.current}/${data.stats.hp.max}`;
+                                } else {
+                                    characterInfo = `✅ ${characters.length} NPCs available`;
+                                }
+                            }
+                        } catch (error) {
+                            campaignInfo = `❌ Campaign Error: ${error.message}`;
+                        }
+                    }
+                }
+            } catch (error) {
+                serverStatus = `❌ Server Error: ${error.message}`;
+            }
+            
+            return `## 🎭 STRES Status
+────────────────────────────────
+**🌐 Server:** ${serverStatus}
+**📡 Server URL:** ${settings[extensionName]?.serverUrl || 'Not configured'}
+
+**💬 Current Chat:** "${chatName}" (${currentChatId})
+**🗺️ Campaign:** ${campaignInfo}
+**👤 Character:** ${characterInfo}
+
+**📊 Statistics:**
+• Total Chat Campaigns: ${totalCampaigns}
+• Auto-injection: ${settings[extensionName]?.autoInjection?.enabled ? '✅ Enabled' : '❌ Disabled'}
+• Tool Calling: ${settings[extensionName]?.autoToolInjection?.enabled ? '✅ Enabled' : '❌ Disabled'}
+
+**🎮 Available Commands:**
+• \`/stres_status\` - Show this status
+• \`/stres_npc <culture> <role>\` - Generate NPC
+• \`/stres_monster <type> <level>\` - Generate monster
+• \`/stres_location <type>\` - Generate location
+• \`/stres_roll <dice>\` - Roll dice
+• \`/stats\` - Show character stats
+• \`/stres_settings\` - Extension settings
+
+*Campaign auto-created for this chat. Switch chats to switch campaigns!*`;
+            
+        } catch (error) {
+            return `❌ **STRES Status Error:** ${error.message}`;
+        }
+    }
+
     async function showSettings(args) {
         const settings = window.extension_settings || extension_settings;
         const html = `
@@ -590,13 +671,74 @@ Location: ${data.location}
             
             if (characters.length > 0) {
                 const playerChar = characters.find(c => c.is_player) || characters[0];
-                characterPanel.setCharacter(playerChar);
-                autoInjector.setCharacter(playerChar);
+                if (characterPanel && characterPanel.setCharacter) {
+                    characterPanel.setCharacter(playerChar);
+                }
+                if (autoInjector && autoInjector.setCharacter) {
+                    autoInjector.setCharacter(playerChar);
+                }
             }
             
             console.log(`[STRES] Campaign '${campaign.name}' loaded`);
         } catch (error) {
             console.error("[STRES] Failed to load campaign:", error);
+        }
+    }
+
+    async function initializeChatCampaign(context) {
+        try {
+            // Get current chat info from SillyTavern
+            const chatMetadata = context.chatMetadata || {};
+            const currentChatId = context.chatId || chatMetadata.chat_id;
+            
+            if (!currentChatId) {
+                console.log("[STRES] No active chat, skipping campaign initialization");
+                return;
+            }
+            
+            console.log(`[STRES] Initializing campaign for chat: ${currentChatId}`);
+            
+            // Check if we already have a campaign for this chat
+            const settings = context.extensionSettings;
+            if (!settings[extensionName].chatCampaigns) {
+                settings[extensionName].chatCampaigns = {};
+            }
+            
+            let campaignId = settings[extensionName].chatCampaigns[currentChatId];
+            
+            if (!campaignId) {
+                // Create new campaign for this chat
+                const chatName = context.chatName || chatMetadata.chat_name || `Chat-${currentChatId}`;
+                const campaignName = `Campaign: ${chatName}`;
+                
+                try {
+                    const newCampaign = await stresClient.createCampaign({ 
+                        name: campaignName, 
+                        description: `Auto-created for SillyTavern chat: ${chatName}` 
+                    });
+                    
+                    campaignId = newCampaign.id;
+                    settings[extensionName].chatCampaigns[currentChatId] = campaignId;
+                    settings[extensionName].campaignId = campaignId; // Set as current
+                    
+                    if (context.saveSettingsDebounced) {
+                        context.saveSettingsDebounced();
+                    }
+                    
+                    console.log(`[STRES] Created new campaign '${campaignName}' (ID: ${campaignId}) for chat ${currentChatId}`);
+                } catch (error) {
+                    console.error("[STRES] Failed to create campaign for chat:", error);
+                    return;
+                }
+            } else {
+                // Load existing campaign
+                settings[extensionName].campaignId = campaignId;
+                await loadCampaign(campaignId);
+                console.log(`[STRES] Loaded existing campaign (ID: ${campaignId}) for chat ${currentChatId}`);
+            }
+            
+        } catch (error) {
+            console.error("[STRES] Failed to initialize chat campaign:", error);
         }
     }
 
@@ -606,7 +748,7 @@ Location: ${data.location}
         
         // Wait for SillyTavern to be ready
         const context = SillyTavern.getContext();
-        const { extensionSettings, saveSettingsDebounced, eventSource, event_types } = context;
+        const { extensionSettings, saveSettingsDebounced, eventSource, event_types, getContext } = context;
         
         console.log("[STRES] SillyTavern context obtained:", {
             extensionSettings: typeof extensionSettings,
@@ -673,6 +815,12 @@ Location: ${data.location}
             }));
             
             SlashCommandParser.addCommandObject(SlashCommand.fromProps({
+                name: 'stres_status',
+                callback: showSTRESStatus,
+                helpString: 'Show STRES status and current campaign info'
+            }));
+            
+            SlashCommandParser.addCommandObject(SlashCommand.fromProps({
                 name: 'stats',
                 callback: showCharacterStats,
                 helpString: 'Show character stats'
@@ -685,9 +833,9 @@ Location: ${data.location}
             }));
             
             SlashCommandParser.addCommandObject(SlashCommand.fromProps({
-                name: 'world',
+                name: 'stres_world',
                 callback: showWorldInfo,
-                helpString: 'Show world information'
+                helpString: 'Show STRES world information'
             }));
             
             console.log("[STRES] Slash commands registered successfully using SlashCommandParser");
@@ -700,9 +848,10 @@ Location: ${data.location}
             registerSlashCommand('stres_location', generateLocation, [], 'Generate location', true, true);
             registerSlashCommand('stres_roll', rollDice, [], 'Roll dice', true, true);
             registerSlashCommand('stres_settings', showSettings, [], 'STRES settings', true, true);
+            registerSlashCommand('stres_status', showSTRESStatus, [], 'STRES status info', true, true);
             registerSlashCommand('stats', showCharacterStats, [], 'Show character stats', true, true);
             registerSlashCommand('inventory', showInventory, [], 'Show character inventory', true, true);
-            registerSlashCommand('world', showWorldInfo, [], 'Show world information', true, true);
+            registerSlashCommand('stres_world', showWorldInfo, [], 'Show STRES world information', true, true);
             
             console.log("[STRES] Slash commands registered successfully using registerSlashCommand");
         } else {
@@ -716,9 +865,14 @@ Location: ${data.location}
         // Setup UI if needed
         setupUI(extensionSettings);
         
-        // Load campaign if one is configured
-        if (extensionSettings[extensionName].campaignId) {
-            await loadCampaign(extensionSettings[extensionName].campaignId);
+        // Auto-create/load campaign based on current chat
+        await initializeChatCampaign(context);
+        
+        // Listen for chat changes to switch campaigns
+        if (eventSource && event_types) {
+            eventSource.on(event_types.CHAT_CHANGED, () => {
+                initializeChatCampaign(context);
+            });
         }
         
         console.log("[STRES] Extension loaded successfully");
