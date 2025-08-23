@@ -52,6 +52,10 @@
 - **Magic Mastery**: Spell schools with affinity systems and progressive learning
 - **Technique System**: Stamina-based special abilities unlocked through skill advancement
 - **Multiple Rulesets**: Support for D&D 5e, Isekai, Generic, and Custom RPG systems
+- **Zero-Setup Tool Calling**: Automatically injects enhanced RPG tools into GPT-4/5, Claude, and Gemini API calls
+- **Context-Aware Activation**: Smart detection of RPG content with enhanced keyword recognition
+- **Real-Time Execution**: LLMs can create characters, learn skills, cast spells, manage factions, and build entire worlds instantly
+- **Multi-Provider Support**: Works seamlessly across all major LLM providers with provider-specific optimizations
 
 ## 📋 Prerequisites
 
@@ -64,7 +68,7 @@
 
 1. Open SillyTavern
 2. Go to **Extensions** → **Install Extension**
-3. Enter this repository URL: `https://github.com/arw052/stres-sillytavern-extension`
+3. Enter this repository URL: `https://github.com/arw052/stres-sillytavern-extension-alpha`
 4. Click **Install**
 5. Enable the extension in the Extensions panel
 
@@ -330,6 +334,48 @@ STRES: 💾 "Character Card Exported!"
 - **Character Cards**: v2, SillyTavern, STRES native, generic JSON
 - **Import Sources**: Local files, drag-and-drop, clipboard data
 - **Export Formats**: Enhanced v2 with world data, lorebook entries, progression tracking
+=======
+### Slash Commands
+
+- `/stres_campaign create <name>` - Create new campaign
+- `/stres_campaign load <id>` - Load existing campaign  
+- `/stres_npc elf merchant female 3` - Generate NPC
+- `/stres_monster dragon 8 large true` - Generate monster
+- `/stres_location tavern medium wealthy` - Generate location
+- `/stres_roll 1d20 5 15` - Roll dice with modifier and target
+- `/stats` - Show character stats
+- `/stres_settings` - Configure extension
+
+### Visual Features
+
+- **Character HUD**: Real-time HP/MP bars and stats display
+- **Auto-injection**: Character status automatically added to messages
+- **Toast Notifications**: Visual feedback for RPG actions
+- **Themed UI**: Fantasy, Cyberpunk, or Minimal themes
+
+### LLM Integration
+
+When using compatible LLMs (GPT-4/5, Gemini 2.5 Pro, Claude), the extension automatically provides RPG tools that the AI can use:
+
+- Generate NPCs, monsters, and locations automatically
+- Track character stats and inventory changes
+- Handle dice rolls and skill checks
+- Maintain world consistency across sessions
+
+## 🔧 Configuration
+
+Access settings with `/stres_settings`:
+
+- **Server URL**: STRES backend server address
+- **Auto-injection**: Automatically inject character status into messages
+- **Theme**: Visual theme (Fantasy/Cyberpunk/Minimal)
+- **Auto Tool Integration**: Enable LLM tool calling (requires compatible LLM)
+
+## 🤝 Compatibility
+
+- **SillyTavern**: Latest version
+- **LLMs**: All models supported, enhanced features with GPT-4/5, Gemini 2.5 Pro, Claude
+- **Browsers**: Chrome, Firefox, Safari, Edge
 
 ## 📖 Documentation
 
