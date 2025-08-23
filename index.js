@@ -550,7 +550,10 @@ Location: ${data.location}
             let characterInfo = '❌ No Character';
             
             try {
-                const healthResponse = await fetch(`${settings[extensionName].serverUrl}/health`);
+                // VERSION 2.1 - Fixed health endpoint
+                const healthUrl = `${settings[extensionName].serverUrl}/health`;
+                console.log("[STRES] Checking server health at:", healthUrl);
+                const healthResponse = await fetch(healthUrl);
                 if (healthResponse.ok) {
                     serverStatus = '✅ Connected';
                     
