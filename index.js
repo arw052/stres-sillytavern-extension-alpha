@@ -550,7 +550,7 @@ Location: ${data.location}
             let characterInfo = '❌ No Character';
             
             try {
-                const healthResponse = await fetch(`${settings[extensionName].serverUrl}/api/health`);
+                const healthResponse = await fetch(`${settings[extensionName].serverUrl}/health`);
                 if (healthResponse.ok) {
                     serverStatus = '✅ Connected';
                     
