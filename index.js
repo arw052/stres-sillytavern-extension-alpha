@@ -637,13 +637,18 @@ Location: ${data.location}
 
     function setupUI(extensionSettings) {
         const settings = extensionSettings || window.extension_settings;
-        const container = document.createElement('div');
-        container.id = 'stres-container';
-        container.className = `stres-theme-${settings[extensionName].ui.theme}`;
-        document.body.appendChild(container);
         
-        if (settings[extensionName].ui.showHUD) {
-            characterPanel.render(container);
+        try {
+            const container = document.createElement('div');
+            container.id = 'stres-container';
+            container.className = `stres-theme-${settings[extensionName].ui.theme}`;
+            document.body.appendChild(container);
+            
+            if (settings[extensionName].ui.showHUD && characterPanel && typeof characterPanel.render === 'function') {
+                characterPanel.render(container);
+            }
+        } catch (error) {
+            console.log("[STRES] UI setup skipped:", error.message);
         }
         
         window.saveSTRESSettings = function() {
