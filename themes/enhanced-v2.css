@@ -1,0 +1,952 @@
+/* STRES v2.0 Enhanced Theme - Comprehensive Styling for Advanced RPG Features */
+
+/* ========== Base Theme ========== */
+.stres-theme-enhanced {
+    --stres-primary: #2563eb;
+    --stres-primary-dark: #1d4ed8;
+    --stres-secondary: #7c3aed;
+    --stres-accent: #f59e0b;
+    --stres-success: #059669;
+    --stres-warning: #d97706;
+    --stres-danger: #dc2626;
+    --stres-info: #0ea5e9;
+    
+    --stres-bg-primary: #0f172a;
+    --stres-bg-secondary: #1e293b;
+    --stres-bg-tertiary: #334155;
+    --stres-text-primary: #f1f5f9;
+    --stres-text-secondary: #cbd5e1;
+    --stres-text-muted: #94a3b8;
+    
+    --stres-border: #475569;
+    --stres-border-light: #64748b;
+    
+    --stres-hp-color: #ef4444;
+    --stres-mp-color: #3b82f6;
+    --stres-stamina-color: #10b981;
+    --stres-luck-color: #f59e0b;
+}
+
+/* ========== Settings Panel Enhanced ========== */
+.stres-settings {
+    background: var(--stres-bg-primary);
+    color: var(--stres-text-primary);
+    border-radius: 12px;
+    padding: 24px;
+    max-width: 800px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    border: 1px solid var(--stres-border);
+}
+
+.stres-settings h3 {
+    color: var(--stres-primary);
+    margin: 0 0 24px 0;
+    font-size: 24px;
+    text-align: center;
+    border-bottom: 2px solid var(--stres-border);
+    padding-bottom: 12px;
+}
+
+.settings-section {
+    margin-bottom: 32px;
+    background: var(--stres-bg-secondary);
+    border-radius: 8px;
+    padding: 20px;
+    border-left: 4px solid var(--stres-primary);
+}
+
+.settings-section h4 {
+    color: var(--stres-accent);
+    margin: 0 0 16px 0;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.setting-item {
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.setting-item label {
+    color: var(--stres-text-primary);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.setting-item input[type="text"],
+.setting-item select {
+    background: var(--stres-bg-tertiary);
+    border: 1px solid var(--stres-border);
+    border-radius: 6px;
+    color: var(--stres-text-primary);
+    padding: 10px 12px;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.setting-item input[type="text"]:focus,
+.setting-item select:focus {
+    outline: none;
+    border-color: var(--stres-primary);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.setting-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--stres-primary);
+}
+
+.setting-item input[type="range"] {
+    accent-color: var(--stres-primary);
+    margin: 0 8px;
+}
+
+.setting-item small {
+    color: var(--stres-text-muted);
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* Model checkboxes */
+.model-checkboxes,
+.world-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+    padding: 12px;
+    background: var(--stres-bg-tertiary);
+    border-radius: 6px;
+}
+
+.model-checkboxes label,
+.world-features label {
+    color: var(--stres-text-secondary);
+    font-size: 14px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.model-checkboxes label:hover,
+.world-features label:hover {
+    color: var(--stres-text-primary);
+}
+
+/* Settings actions */
+.settings-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid var(--stres-border);
+}
+
+.save-btn,
+.reset-btn,
+.export-btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.save-btn {
+    background: var(--stres-success);
+    color: white;
+}
+
+.save-btn:hover {
+    background: #047857;
+    transform: translateY(-1px);
+}
+
+.reset-btn {
+    background: var(--stres-warning);
+    color: white;
+}
+
+.reset-btn:hover {
+    background: #b45309;
+    transform: translateY(-1px);
+}
+
+.export-btn {
+    background: var(--stres-info);
+    color: white;
+}
+
+.export-btn:hover {
+    background: #0284c7;
+    transform: translateY(-1px);
+}
+
+/* Settings info */
+.settings-info {
+    margin-top: 32px;
+    background: var(--stres-bg-secondary);
+    padding: 20px;
+    border-radius: 8px;
+    border-left: 4px solid var(--stres-info);
+}
+
+.settings-info h4 {
+    color: var(--stres-info);
+    margin: 0 0 12px 0;
+}
+
+.commands-list {
+    font-family: 'Cascadia Code', 'Fira Code', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.commands-list code {
+    background: var(--stres-bg-tertiary);
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: var(--stres-accent);
+    display: inline-block;
+    margin-right: 8px;
+    margin-bottom: 4px;
+}
+
+/* ========== Enhanced Character Panel ========== */
+.stres-enhanced-panel {
+    background: var(--stres-bg-primary);
+    border: 1px solid var(--stres-border);
+    border-radius: 12px;
+    color: var(--stres-text-primary);
+    max-width: 400px;
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    overflow: hidden;
+}
+
+.enhanced-panel-header {
+    background: linear-gradient(135deg, var(--stres-primary), var(--stres-secondary));
+    padding: 16px;
+    text-align: center;
+}
+
+.enhanced-panel-header h3 {
+    margin: 0 0 12px 0;
+    font-size: 20px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* Character quick stats bars */
+.character-quick-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stat-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+}
+
+.stat-bar label {
+    min-width: 60px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.bar-container {
+    flex: 1;
+    position: relative;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+    height: 16px;
+    overflow: hidden;
+}
+
+.bar {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+    position: relative;
+}
+
+.hp-bar {
+    background: linear-gradient(90deg, var(--stres-hp-color), #f87171);
+}
+
+.mp-bar {
+    background: linear-gradient(90deg, var(--stres-mp-color), #60a5fa);
+}
+
+.stamina-bar {
+    background: linear-gradient(90deg, var(--stres-stamina-color), #34d399);
+}
+
+.bar.critical {
+    animation: pulse-critical 1s infinite;
+}
+
+.bar.warning {
+    filter: brightness(0.8);
+}
+
+@keyframes pulse-critical {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.bar-text {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+    font-size: 11px;
+    pointer-events: none;
+}
+
+/* Tab system */
+.enhanced-panel-tabs {
+    display: flex;
+    background: var(--stres-bg-secondary);
+    border-bottom: 1px solid var(--stres-border);
+    overflow-x: auto;
+}
+
+.tab-button {
+    background: none;
+    border: none;
+    color: var(--stres-text-secondary);
+    padding: 12px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+    white-space: nowrap;
+}
+
+.tab-button:hover {
+    background: var(--stres-bg-tertiary);
+    color: var(--stres-text-primary);
+}
+
+.tab-button.active {
+    color: var(--stres-primary);
+    border-bottom-color: var(--stres-primary);
+    background: var(--stres-bg-primary);
+}
+
+.unique-skill-tab.active {
+    color: var(--stres-luck-color);
+    border-bottom-color: var(--stres-luck-color);
+}
+
+/* Tab content */
+.enhanced-panel-content {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.tab-content {
+    display: none;
+    padding: 16px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/* Character info */
+.character-info {
+    background: var(--stres-bg-secondary);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 16px;
+    border-left: 4px solid var(--stres-primary);
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.info-row:last-child {
+    margin-bottom: 0;
+}
+
+.info-row span:first-child {
+    color: var(--stres-text-secondary);
+    font-weight: 500;
+}
+
+.info-row span:last-child {
+    color: var(--stres-text-primary);
+    font-weight: 600;
+}
+
+/* Stats grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.stat-item {
+    background: var(--stres-bg-secondary);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+    border: 1px solid var(--stres-border);
+    transition: all 0.2s;
+}
+
+.stat-item:hover {
+    border-color: var(--stres-primary);
+    transform: translateY(-1px);
+}
+
+.stat-item.luck-stat {
+    border-color: var(--stres-luck-color);
+    background: linear-gradient(135deg, var(--stres-bg-secondary), rgba(245, 158, 11, 0.05));
+}
+
+.stat-item.luck-stat:hover {
+    border-color: var(--stres-luck-color);
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+}
+
+.stat-item label {
+    display: block;
+    color: var(--stres-text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.stat-item span {
+    color: var(--stres-text-primary);
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.stat-item small {
+    display: block;
+    color: var(--stres-text-muted);
+    font-size: 10px;
+    margin-top: 2px;
+}
+
+/* Skills */
+.skills-header,
+.magic-header,
+.inventory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.skill-action-btn {
+    background: var(--stres-primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.skill-action-btn:hover {
+    background: var(--stres-primary-dark);
+    transform: translateY(-1px);
+}
+
+.skills-list,
+.spells-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.skill-item,
+.spell-item {
+    background: var(--stres-bg-secondary);
+    border-radius: 8px;
+    padding: 12px;
+    border-left: 4px solid var(--stres-primary);
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+.skill-item:hover,
+.spell-item:hover {
+    background: var(--stres-bg-tertiary);
+    transform: translateX(4px);
+}
+
+.skill-header,
+.spell-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.skill-name,
+.spell-name {
+    font-weight: 600;
+    color: var(--stres-text-primary);
+}
+
+.skill-rank,
+.spell-tier {
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.skill-rank.novice { background: #374151; color: #9ca3af; }
+.skill-rank.initiate { background: #065f46; color: #10b981; }
+.skill-rank.apprentice { background: #1e40af; color: #3b82f6; }
+.skill-rank.journeyman { background: #7c2d12; color: #ea580c; }
+.skill-rank.adept { background: #581c87; color: #a855f7; }
+.skill-rank.master { background: #991b1b; color: #ef4444; }
+.skill-rank.grandmaster { background: #d97706; color: #f59e0b; }
+
+.skill-details,
+.spell-details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--stres-text-secondary);
+}
+
+.skill-progress {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.xp-bar,
+.stres-progress-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--stres-bg-primary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.xp-fill,
+.stres-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--stres-primary), var(--stres-secondary));
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+/* Magic schools */
+.magic-schools {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.stres-magic-school {
+    background: var(--stres-bg-secondary);
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    border: 1px solid var(--stres-border);
+}
+
+.stres-school-name {
+    display: block;
+    font-weight: 600;
+    color: var(--stres-text-primary);
+    margin-bottom: 4px;
+}
+
+.stres-school-level {
+    color: var(--stres-primary);
+    font-weight: 500;
+}
+
+.stres-school-mastery {
+    color: var(--stres-text-muted);
+    font-size: 10px;
+}
+
+/* Inventory */
+.inventory-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+}
+
+.inventory-item,
+.stres-inventory-item {
+    background: var(--stres-bg-secondary);
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+    font-size: 12px;
+    border: 1px solid var(--stres-border);
+    transition: all 0.2s;
+}
+
+.inventory-item:hover,
+.stres-inventory-item:hover {
+    border-color: var(--stres-primary);
+    transform: translateY(-2px);
+}
+
+.item-name,
+.stres-item-name {
+    font-weight: 600;
+    color: var(--stres-text-primary);
+    margin-bottom: 4px;
+}
+
+.item-quantity,
+.stres-item-quantity {
+    color: var(--stres-accent);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* Unique Skill */
+.stres-unique-skill {
+    background: linear-gradient(135deg, var(--stres-bg-secondary), rgba(245, 158, 11, 0.1));
+    border-radius: 12px;
+    padding: 16px;
+    border: 2px solid var(--stres-luck-color);
+    margin-bottom: 16px;
+}
+
+.stres-unique-skill-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.stres-unique-skill-header h5 {
+    color: var(--stres-luck-color);
+    margin: 0;
+    font-size: 16px;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.stres-evolution-level {
+    background: var(--stres-luck-color);
+    color: var(--stres-bg-primary);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+}
+
+.stres-unique-skill-desc {
+    color: var(--stres-text-secondary);
+    font-style: italic;
+    margin-bottom: 12px;
+    line-height: 1.4;
+}
+
+.evolution-progress {
+    display: flex;
+    gap: 4px;
+    margin-top: 12px;
+}
+
+.evolution-stage {
+    flex: 1;
+    padding: 6px 4px;
+    background: var(--stres-bg-primary);
+    border-radius: 4px;
+    text-align: center;
+    font-size: 10px;
+    color: var(--stres-text-muted);
+    border: 1px solid var(--stres-border);
+    transition: all 0.2s;
+}
+
+.evolution-stage.completed {
+    background: var(--stres-success);
+    color: white;
+    border-color: var(--stres-success);
+}
+
+.evolution-stage.active {
+    background: var(--stres-luck-color);
+    color: var(--stres-bg-primary);
+    border-color: var(--stres-luck-color);
+    font-weight: 600;
+    animation: glow-unique 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow-unique {
+    from { box-shadow: 0 0 8px rgba(245, 158, 11, 0.3); }
+    to { box-shadow: 0 0 16px rgba(245, 158, 11, 0.6); }
+}
+
+/* Otherworlder badge */
+.stres-otherworlder-badge {
+    background: linear-gradient(135deg, var(--stres-luck-color), #fbbf24);
+    color: var(--stres-bg-primary);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    margin-top: 8px;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+/* Empty states */
+.stres-empty {
+    text-align: center;
+    color: var(--stres-text-muted);
+    font-style: italic;
+    padding: 24px;
+    font-size: 14px;
+}
+
+.no-skills,
+.no-spells,
+.no-items {
+    background: var(--stres-bg-secondary);
+    border-radius: 8px;
+    padding: 20px;
+    text-align: center;
+    color: var(--stres-text-muted);
+    font-style: italic;
+}
+
+/* Toast notifications */
+.stres-toast {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: var(--stres-bg-primary);
+    border: 1px solid var(--stres-border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    color: var(--stres-text-primary);
+    font-size: 14px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    max-width: 350px;
+    animation: slideInRight 0.3s ease-out;
+}
+
+.stres-toast.toast-success {
+    border-left: 4px solid var(--stres-success);
+    background: linear-gradient(135deg, var(--stres-bg-primary), rgba(5, 150, 105, 0.05));
+}
+
+.stres-toast.toast-error {
+    border-left: 4px solid var(--stres-danger);
+    background: linear-gradient(135deg, var(--stres-bg-primary), rgba(220, 38, 38, 0.05));
+}
+
+.stres-toast.toast-warning {
+    border-left: 4px solid var(--stres-warning);
+    background: linear-gradient(135deg, var(--stres-bg-primary), rgba(217, 119, 6, 0.05));
+}
+
+.stres-toast.stres-toast-rpg-tool {
+    border-left: 4px solid var(--stres-primary);
+    background: linear-gradient(135deg, var(--stres-bg-primary), rgba(37, 99, 235, 0.05));
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.stres-toast.fade-out {
+    animation: slideOutRight 0.3s ease-in forwards;
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Panel actions */
+.panel-actions {
+    padding: 16px;
+    background: var(--stres-bg-secondary);
+    border-top: 1px solid var(--stres-border);
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+}
+
+.action-btn,
+.stres-btn {
+    background: var(--stres-primary);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 500;
+}
+
+.action-btn:hover,
+.stres-btn:hover {
+    background: var(--stres-primary-dark);
+    transform: translateY(-1px);
+}
+
+.stres-btn-sm {
+    padding: 4px 8px;
+    font-size: 11px;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+    .stres-enhanced-panel {
+        max-width: 100%;
+        margin: 0;
+    }
+    
+    .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .enhanced-panel-tabs {
+        font-size: 12px;
+    }
+    
+    .tab-button {
+        padding: 10px 12px;
+    }
+}
+
+/* Scrollbar styling */
+.enhanced-panel-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.enhanced-panel-content::-webkit-scrollbar-track {
+    background: var(--stres-bg-primary);
+}
+
+.enhanced-panel-content::-webkit-scrollbar-thumb {
+    background: var(--stres-border);
+    border-radius: 3px;
+}
+
+.enhanced-panel-content::-webkit-scrollbar-thumb:hover {
+    background: var(--stres-border-light);
+}
+
+/* Character locations and NPCs */
+.stres-locations-list,
+.stres-npcs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.stres-location-item,
+.stres-npc-item {
+    background: var(--stres-bg-secondary);
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    border-left: 3px solid var(--stres-primary);
+}
+
+.stres-location-name,
+.stres-npc-name {
+    font-weight: 600;
+    color: var(--stres-text-primary);
+}
+
+.stres-location-type,
+.stres-npc-role {
+    color: var(--stres-text-muted);
+    font-size: 11px;
+    margin-left: 8px;
+}
+
+/* Error states */
+.stres-error {
+    color: var(--stres-danger);
+    background: rgba(220, 38, 38, 0.1);
+    border: 1px solid var(--stres-danger);
+    border-radius: 6px;
+    padding: 12px;
+    text-align: center;
+    font-size: 13px;
+}
+
+/* Loading states */
+.stres-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--stres-text-muted);
+    font-size: 13px;
+    padding: 20px;
+}
+
+.stres-loading::before {
+    content: '';
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--stres-border);
+    border-top: 2px solid var(--stres-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

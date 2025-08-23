@@ -1,0 +1,13 @@
+{
+  "display_name": "STRES - RPG Enhancement System",
+  "loading_order": 50,
+  "requires": [],
+  "optional": [],
+  "js": "index.js",
+  "css": "style.css",
+  "author": "STRES Team",
+  "version": "1.0.0",
+  "homePage": "https://github.com/arw052/stres-sillytavern-extension-alpha",
+  "auto_update": true,
+  "description": "Comprehensive RPG automation system with character management, NPC generation, world building, and LLM tool integration for enhanced fantasy roleplay."
+}

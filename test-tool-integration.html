@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STRES Tool Integration Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #1a1a1a;
+            color: #e0e0e0;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1, h2 {
+            color: #ffd700;
+        }
+        .test-section {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .test-button {
+            background: #4a4a6a;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #5a5a7a;
+        }
+        .output {
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 5px;
+            padding: 10px;
+            margin-top: 10px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        .status.success {
+            background: #2a4a2a;
+            color: #4afa4a;
+        }
+        .status.error {
+            background: #4a2a2a;
+            color: #fa4a4a;
+        }
+        .status.info {
+            background: #2a2a4a;
+            color: #4a9afa;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎲 STRES Tool Integration Test Suite</h1>
+    
+    <div class="test-section">
+        <h2>1. Tool Definitions Test</h2>
+        <p>Load tool definitions from the STRES server</p>
+        <button class="test-button" onclick="testToolDefinitions()">Load Tool Definitions</button>
+        <div id="tool-definitions-output" class="output"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. API Interception Test</h2>
+        <p>Test the fetch interceptor for different LLM providers</p>
+        <button class="test-button" onclick="testOpenAIInterception()">Test OpenAI</button>
+        <button class="test-button" onclick="testClaudeInterception()">Test Claude</button>
+        <button class="test-button" onclick="testGeminiInterception()">Test Gemini</button>
+        <div id="interception-output" class="output"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Tool Execution Test</h2>
+        <p>Execute various RPG tools</p>
+        <button class="test-button" onclick="testGenerateNPC()">Generate NPC</button>
+        <button class="test-button" onclick="testGenerateMonster()">Generate Monster</button>
+        <button class="test-button" onclick="testRollDice()">Roll Dice</button>
+        <div id="execution-output" class="output"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>4. Tool Call Extraction Test</h2>
+        <p>Test extraction of tool calls from different LLM response formats</p>
+        <button class="test-button" onclick="testOpenAIExtraction()">OpenAI Format</button>
+        <button class="test-button" onclick="testClaudeExtraction()">Claude Format</button>
+        <button class="test-button" onclick="testGeminiExtraction()">Gemini Format</button>
+        <div id="extraction-output" class="output"></div>
+    </div>
+
+    <script type="module">
+        // Mock SillyTavern context
+        window.SillyTavern = {
+            getContext: () => ({
+                extensionSettings: {
+                    stres: {
+                        serverUrl: "http://localhost:8000",
+                        campaignId: "test-campaign",
+                        autoToolInjection: {
+                            enabled: true,
+                            enabledModels: ["gpt-4", "claude", "gemini-2.5-pro"]
+                        },
+                        autoStateTracking: {
+                            enabled: true
+                        }
+                    }
+                },
+                eventSource: {
+                    on: () => {}
+                }
+            })
+        };
+
+        // Import modules
+        import { ToolIntegration } from './components/tool-integration.js';
+        
+        // Initialize
+        const mockClient = {
+            getToolDefinitions: async () => {
+                const response = await fetch('http://localhost:8000/api/tools/definitions');
+                return response.json();
+            },
+            executeTool: async (toolName, parameters) => {
+                const response = await fetch('http://localhost:8000/api/tools/execute', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ tool_name: toolName, parameters })
+                });
+                return response.json();
+            },
+            request: async (endpoint, options) => {
+                const response = await fetch(`http://localhost:8000/api${endpoint}`, options);
+                return response.json();
+            }
+        };
+
+        const settings = SillyTavern.getContext().extensionSettings.stres;
+        const toolIntegration = new ToolIntegration(mockClient, settings);
+
+        // Test functions
+        window.testToolDefinitions = async () => {
+            const output = document.getElementById('tool-definitions-output');
+            try {
+                output.innerHTML = '<span class="status info">Loading tool definitions...</span>\n';
+                const definitions = await mockClient.getToolDefinitions();
+                output.innerHTML += `<span class="status success">Success!</span>\n`;
+                output.innerHTML += `Loaded ${definitions.tools.length} tools:\n`;
+                definitions.tools.forEach(tool => {
+                    output.innerHTML += `- ${tool.function.name}: ${tool.function.description}\n`;
+                });
+            } catch (error) {
+                output.innerHTML += `<span class="status error">Error: ${error.message}</span>`;
+            }
+        };
+
+        window.testOpenAIInterception = () => {
+            const output = document.getElementById('interception-output');
+            output.innerHTML = '<span class="status info">Testing OpenAI interception...</span>\n';
+            
+            const mockBody = {
+                messages: [
+                    { role: "user", content: "I enter the tavern and look around" }
+                ]
+            };
+            
+            toolIntegration.injectOpenAITools(mockBody);
+            
+            if (mockBody.tools && mockBody.tools.length > 0) {
+                output.innerHTML += `<span class="status success">Success!</span>\n`;
+                output.innerHTML += `Injected ${mockBody.tools.length} tools\n`;
+                output.innerHTML += `Tool choice: ${mockBody.tool_choice}\n`;
+                output.innerHTML += `Sample tool: ${mockBody.tools[0].function.name}`;
+            } else {
+                output.innerHTML += `<span class="status error">Failed to inject tools</span>`;
+            }
+        };
+
+        window.testClaudeInterception = () => {
+            const output = document.getElementById('interception-output');
+            output.innerHTML = '<span class="status info">Testing Claude interception...</span>\n';
+            
+            const mockBody = {
+                messages: [
+                    { role: "user", content: "Generate an NPC for the shop" }
+                ]
+            };
+            
+            toolIntegration.injectClaudeTools(mockBody);
+            
+            if (mockBody.tools && mockBody.tools.length > 0) {
+                output.innerHTML += `<span class="status success">Success!</span>\n`;
+                output.innerHTML += `Injected ${mockBody.tools.length} tools\n`;
+                output.innerHTML += `Sample tool: ${mockBody.tools[0].name}`;
+            } else {
+                output.innerHTML += `<span class="status error">Failed to inject tools</span>`;
+            }
+        };
+
+        window.testGeminiInterception = () => {
+            const output = document.getElementById('interception-output');
+            output.innerHTML = '<span class="status info">Testing Gemini interception...</span>\n';
+            
+            const mockBody = {
+                contents: [
+                    { parts: [{ text: "Roll dice for a combat encounter" }] }
+                ]
+            };
+            
+            toolIntegration.injectGeminiTools(mockBody);
+            
+            if (mockBody.tools && mockBody.tools[0].function_declarations) {
+                output.innerHTML += `<span class="status success">Success!</span>\n`;
+                output.innerHTML += `Injected ${mockBody.tools[0].function_declarations.length} tools\n`;
+                output.innerHTML += `Sample tool: ${mockBody.tools[0].function_declarations[0].name}`;
+            } else {
+                output.innerHTML += `<span class="status error">Failed to inject tools</span>`;
+            }
+        };
+
+        window.testGenerateNPC = async () => {
+            const output = document.getElementById('execution-output');
+            try {
+                output.innerHTML = '<span class="status info">Generating NPC...</span>\n';
+                const result = await mockClient.executeTool('generate_npc', {
+                    campaign_id: 'test-campaign',
+                    culture: 'elf',
+                    role: 'merchant',
+                    gender: 'female',
+                    level: 3
+                });
+                
+                if (result.success) {
+                    output.innerHTML += `<span class="status success">Success!</span>\n`;
+                    output.innerHTML += JSON.stringify(result.result, null, 2);
+                } else {
+                    output.innerHTML += `<span class="status error">Failed: ${result.error}</span>`;
+                }
+            } catch (error) {
+                output.innerHTML += `<span class="status error">Error: ${error.message}</span>`;
+            }
+        };
+
+        window.testGenerateMonster = async () => {
+            const output = document.getElementById('execution-output');
+            try {
+                output.innerHTML = '<span class="status info">Generating Monster...</span>\n';
+                const result = await mockClient.executeTool('generate_monster', {
+                    campaign_id: 'test-campaign',
+                    monster_type: 'goblin',
+                    level: 2,
+                    size: 'small',
+                    is_boss: false
+                });
+                
+                if (result.success) {
+                    output.innerHTML += `<span class="status success">Success!</span>\n`;
+                    output.innerHTML += JSON.stringify(result.result, null, 2);
+                } else {
+                    output.innerHTML += `<span class="status error">Failed: ${result.error}</span>`;
+                }
+            } catch (error) {
+                output.innerHTML += `<span class="status error">Error: ${error.message}</span>`;
+            }
+        };
+
+        window.testRollDice = async () => {
+            const output = document.getElementById('execution-output');
+            try {
+                output.innerHTML = '<span class="status info">Rolling Dice...</span>\n';
+                const result = await mockClient.executeTool('roll_dice', {
+                    dice_expression: '1d20',
+                    modifier: 5,
+                    target_number: 15,
+                    description: 'Attack roll'
+                });
+                
+                if (result.success) {
+                    output.innerHTML += `<span class="status success">Success!</span>\n`;
+                    output.innerHTML += JSON.stringify(result.result, null, 2);
+                } else {
+                    output.innerHTML += `<span class="status error">Failed: ${result.error}</span>`;
+                }
+            } catch (error) {
+                output.innerHTML += `<span class="status error">Error: ${error.message}</span>`;
+            }
+        };
+
+        window.testOpenAIExtraction = () => {
+            const output = document.getElementById('extraction-output');
+            output.innerHTML = '<span class="status info">Testing OpenAI format extraction...</span>\n';
+            
+            const mockResponse = {
+                tool_calls: [
+                    {
+                        function: {
+                            name: "generate_npc",
+                            arguments: JSON.stringify({
+                                campaign_id: "test",
+                                culture: "human",
+                                role: "guard"
+                            })
+                        }
+                    }
+                ]
+            };
+            
+            const extracted = toolIntegration.extractToolCalls(mockResponse);
+            output.innerHTML += `<span class="status success">Extracted ${extracted.length} tool calls</span>\n`;
+            output.innerHTML += JSON.stringify(extracted, null, 2);
+        };
+
+        window.testClaudeExtraction = () => {
+            const output = document.getElementById('extraction-output');
+            output.innerHTML = '<span class="status info">Testing Claude format extraction...</span>\n';
+            
+            const mockResponse = {
+                content: [
+                    {
+                        type: "tool_use",
+                        name: "roll_dice",
+                        input: {
+                            dice_expression: "2d6",
+                            modifier: 3
+                        }
+                    }
+                ]
+            };
+            
+            const extracted = toolIntegration.extractToolCalls(mockResponse);
+            output.innerHTML += `<span class="status success">Extracted ${extracted.length} tool calls</span>\n`;
+            output.innerHTML += JSON.stringify(extracted, null, 2);
+        };
+
+        window.testGeminiExtraction = () => {
+            const output = document.getElementById('extraction-output');
+            output.innerHTML = '<span class="status info">Testing Gemini format extraction...</span>\n';
+            
+            const mockResponse = {
+                parts: [
+                    {
+                        functionCall: {
+                            name: "generate_location",
+                            args: {
+                                campaign_id: "test",
+                                location_type: "tavern",
+                                size: "medium"
+                            }
+                        }
+                    }
+                ]
+            };
+            
+            const extracted = toolIntegration.extractToolCalls(mockResponse);
+            output.innerHTML += `<span class="status success">Extracted ${extracted.length} tool calls</span>\n`;
+            output.innerHTML += JSON.stringify(extracted, null, 2);
+        };
+    </script>
+</body>
+</html>
